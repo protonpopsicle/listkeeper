@@ -27,22 +27,22 @@ def is_date(string):
     except ValueError:
         return False
 
-def list_get(idx, alist):
+def list_get(alist, i, default=None):
     try:
-        return alist[idx]
+        return alist[i]
     except IndexError:
-        return None
+        return default
 
-def parse_column(idx, records):
+def parse_column(records, col):
     # check for explicit types
-    name = records[0][idx]
+    name = records[0][col]
     parts = name.split('(s)')
     if len(parts) == 2:
         return parts[0], list
 
     # infer implicit types
     for record in records[1:]:
-        item = list_get(idx, record)
+        item = list_get(record, col)
         if item: # don't count empty items
             if is_int(item):
                 return name, int
@@ -54,34 +54,27 @@ def parse_column(idx, records):
                 return name, str
     return name, type(None)
 
-def type_convert(column_defs, records):
-    pass
+# def type_convert(col_def, records):
+#     col_def
+#     pass
 
 class Catalog(object):
     def __init__(self, records, *args, **kwargs):
-        self.header = records[0]
-
-        self.column_defs = []
-        for idx, v in enumerate(records[0]):
-            self.column_defs.append(parse_column(idx, records))
-        print self.column_defs
-
-        def get(record, i):
-            try:
-                return record[i]
-            except IndexError:
-                return ''
+        self.columns = []
+        for idx, val in enumerate(records[0]):
+            self.columns.append(parse_column(records, idx))
+        print self.columns
 
         self.records = []
         for record in records[1:]:
             self.records.append({
-                h: get(record, i) for i, h in enumerate(self.header)})
+                h[0]: list_get(record, i, '') for i, h in enumerate(self.columns)})
 
         super(Catalog, self).__init__(*args, **kwargs)
 
     def sort(self, header=None):
         if not header:
-            header = self.header[0]
+            header = self.columns[0]
 
         return sorted(self.records, key=lambda r: r[header].lower())
 

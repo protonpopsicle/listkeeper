@@ -9,9 +9,6 @@ from dateutil.parser import parse
 class ANSI:
     END = '\033[0m'
     BOLD = '\033[1m'
-    # RED = '\e[31m'
-    # YELLOW = '\e[33m'
-    # UNDERLINE = '\e[4m'
 
 def is_int(string):
     try:
@@ -102,24 +99,29 @@ def render_as_text(records, fields, tty=None, maxlen=None):
         else:
             o = str(item)
         if maxlen and len(o) > maxlen:
-            o = o[:maxlen] + '...'
+            o = o[:maxlen] + '..'
 
         if tty and col == 0:
             return ANSI.BOLD + o + ANSI.END
         return o
 
     template = ''
+    total_width = 0
 
     for i, field in enumerate(fields):
         rendered_items = [render_item(r, i) for r in records]
         widest = max([len(r) for r in rendered_items])
-        template += '{%s: <%s}' % (i, widest + 3)
+        col_width = widest + 3
+        total_width += col_width
+        template += '{%s: <%s}' % (i, col_width)
 
-    out = ''
+    hr_template ='{:-^%s}\n' % total_width
+    out = hr_template.format('')
     for rec in records:
         rendered_items = [render_item(rec, i) \
                           for i, item in enumerate(fields)]
         out += '%s\n' % template.format(*rendered_items)
+    out += hr_template.format('')
     return out
 
 def render_html(header, records):
@@ -186,7 +188,7 @@ def main():
 
     if args.format == 'text':
         if sys.stdout.isatty():
-            print render_as_text(parsed_recs, fields, tty=True, maxlen=25)
+            print render_as_text(parsed_recs, fields, tty=True, maxlen=32)
         else: # you're being piped or redirected
             print render_as_text(parsed_recs, fields)
     elif args.format == 'html':

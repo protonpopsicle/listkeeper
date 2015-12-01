@@ -6,6 +6,13 @@ from datetime import datetime
 from dateutil.parser import parse
 
 
+class ANSI:
+    END = '\033[0m'
+    BOLD = '\033[1m'
+    # RED = '\e[31m'
+    # YELLOW = '\e[33m'
+    # UNDERLINE = '\e[4m'
+
 def is_int(string):
     try:
         int(string)
@@ -33,50 +40,108 @@ def list_get(alist, i, default=None):
     except IndexError:
         return default
 
-def parse_column(records, col):
+def infer_field(records, i):
     # check for explicit types
-    name = records[0][col]
+    name = records[0][i]
     parts = name.split('(s)')
     if len(parts) == 2:
         return parts[0], list
 
     # infer implicit types
     for record in records[1:]:
-        item = list_get(record, col)
-        if item: # don't count empty items
+        item = list_get(record, i)
+        if item:
             if is_int(item):
                 return name, int
             elif is_float(item):
                 return name, float
             elif is_date(item):
                 return name, datetime
+    return name, str
+
+def parse_record(rec, fields):
+    typed_rec = []
+    for i, field in enumerate(fields):
+        name, _type = field
+        item = list_get(rec, i)
+        if not item:
+            if _type == list:
+                typed_rec.append([])
             else:
-                return name, str
-    return name, type(None)
+                typed_rec.append(None)
+        else:
+            if _type == list:
+                typed_rec.append(item.split(','))
+            elif _type in [int, float]:
+                typed_rec.append(_type(item))
+            elif _type == datetime:
+                typed_rec.append(parse(item))
+            else:
+                typed_rec.append(item)
+    return typed_rec
 
-# def type_convert(col_def, records):
-#     col_def
-#     pass
+    # def sort(self, header=None):
+    #     if not header:
+    #         header = self.columns[0]
 
-class Catalog(object):
-    def __init__(self, records, *args, **kwargs):
-        self.columns = []
-        for idx, val in enumerate(records[0]):
-            self.columns.append(parse_column(records, idx))
-        print self.columns
+    #     return sorted(self.records, key=lambda r: r[header].lower())
 
-        self.records = []
-        for record in records[1:]:
-            self.records.append({
-                h[0]: list_get(record, i, '') for i, h in enumerate(self.columns)})
 
-        super(Catalog, self).__init__(*args, **kwargs)
+def render_as_text(records, fields, tty=None, maxlen=None):
+    def render_item(record, col):
+        field = fields[col]
+        item = record[col]
+        if item == None:
+            return ''
 
-    def sort(self, header=None):
-        if not header:
-            header = self.columns[0]
+        _type = field[1]
+        if _type == list:
+            o = ''.join(item)
+        elif _type == datetime:
+            o = item.strftime('%d, %b %Y')
+        else:
+            o = str(item)
+        if maxlen and len(o) > maxlen:
+            o = o[:maxlen] + '...'
 
-        return sorted(self.records, key=lambda r: r[header].lower())
+        if tty and col == 0:
+            return ANSI.BOLD + o + ANSI.END
+        return o
+
+    template = ''
+
+    for i, field in enumerate(fields):
+        rendered_items = [render_item(r, i) for r in records]
+        widest = max([len(r) for r in rendered_items])
+        template += '{%s: <%s}' % (i, widest + 3)
+
+    out = ''
+    for rec in records:
+        rendered_items = [render_item(rec, i) \
+                          for i, item in enumerate(fields)]
+        out += '%s\n' % template.format(*rendered_items)
+    return out
+
+def render_html(header, records):
+    document = '''
+    <!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>list-keeper</title>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        </head>
+        <body>
+            <div class="container">
+                <table class="table table-striped table-condensed table-bordered">%s</table>
+            </div>
+        </body>
+    </html>
+    '''
+    tmpl = '<tr>' + ''.join(['<td>{%s}</td>' % h for h in header]) + '</tr>'
+    return document % ''.join([tmpl.format(**r) for r in records])
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -90,7 +155,7 @@ def main():
         for line in f:
             x = line.strip()
             if x == '.':
-                record.append('')
+                record.append(None)
             elif x:
                 record.append(x)
             else:
@@ -106,46 +171,27 @@ def main():
             records.append(record)
 
     if not len(records):
-        print 'file contains no records. exiting'
+        print 'list contains no records. exiting'
         return
 
-    catalog = Catalog(records)
+    fields = []
+    for i, x in enumerate(records[0]):
+        fields += [infer_field(records, i)]
+    # print fields
 
-    def render_text(header, records):
-        template = ''
-        for h in header:
-            max_len = max([len(r[h]) for r in records])
-            template += '{%s:%s}' % (h, max_len + 3)
-
-        out = ''
-        for i, r in enumerate(records):
-            out += '%s. %s\n' % (i + 1, template.format(**r))
-        return out
-
-    def render_html(header, records):
-        document = '''
-        <!DOCTYPE html>
-        <html lang="en">
-            <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <title>list-keeper</title>
-                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-            </head>
-            <body>
-                <div class="container">
-                    <table class="table table-striped table-condensed table-bordered">%s</table>
-                </div>
-            </body>
-        </html>
-        '''
-        tmpl = '<tr>' + ''.join(['<td>{%s}</td>' % h for h in header]) + '</tr>'
-        return document % ''.join([tmpl.format(**r) for r in records])
+    parsed_recs = []
+    for rec in records[1:]:
+        parsed_recs += [parse_record(rec, fields)]
+    # print parsed_recs
 
     if args.format == 'text':
-        print render_text(catalog.header, catalog.sort())
+        if sys.stdout.isatty():
+            print render_as_text(parsed_recs, fields, tty=True, maxlen=25)
+        else: # you're being piped or redirected
+            print render_as_text(parsed_recs, fields)
     elif args.format == 'html':
-        print render_html(catalog.header, catalog.sort())
+        print 'html'
+        # print render_html(catalog)
 
 if __name__ == '__main__':
     main()

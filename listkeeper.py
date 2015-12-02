@@ -68,7 +68,7 @@ def parse_record(rec, fields):
                 typed_rec.append(None)
         else:
             if _type == list:
-                typed_rec.append(item.split(','))
+                typed_rec.append([i.strip() for i in item.split(',')])
             elif _type in [int, float]:
                 typed_rec.append(_type(item))
             elif _type == datetime:
@@ -84,8 +84,8 @@ def parse_record(rec, fields):
     #     return sorted(self.records, key=lambda r: r[header].lower())
 
 
-def render_as_text(records, fields, tty=None, maxlen=None):
-    def render_item(record, col):
+def render_as_text(records, fields, tty=None, col_width=None):
+    def render_item(record, col, do_ansi=False):
         field = fields[col]
         item = record[col]
         if item == None:
@@ -93,30 +93,31 @@ def render_as_text(records, fields, tty=None, maxlen=None):
 
         _type = field[1]
         if _type == list:
-            o = ''.join(item)
+            o = ', '.join(item)
         elif _type == datetime:
             o = item.strftime('%d, %b %Y')
         else:
             o = str(item)
-        if maxlen and len(o) > maxlen:
-            o = o[:maxlen] + '..'
+        if col_width and len(o) > col_width:
+            o = o[:col_width].strip() + '...'
 
-        if tty and col == 0:
-            return ANSI.BOLD + o + ANSI.END
-        return o
+        if tty and do_ansi:
+            if col == 0:
+                o = ANSI.BOLD + o + ANSI.END
+        return ' ' + o + ' '
 
     template = ''
     total_width = 0
 
     for i, field in enumerate(fields):
         rendered_items = [render_item(r, i) for r in records]
-        widest = max([len(r) for r in rendered_items])
-        col_width = widest + 3
-        total_width += col_width
-        template += '{%s: <%s}' % (i, col_width)
+        maxlen = max([len(r) for r in rendered_items])
+        width = maxlen
+        total_width += width
+        template += '{%s: <%s}' % (i, width)
 
-    hr_template ='{:-^%s}\n' % total_width
-    out = hr_template.format('')
+    hr_template ='{:-^%s}' % total_width
+    out = hr_template.format('') + '\n'
     for rec in records:
         rendered_items = [render_item(rec, i) \
                           for i, item in enumerate(fields)]
@@ -161,7 +162,8 @@ def main():
             elif x:
                 record.append(x)
             else:
-                return record
+                break
+        return record
 
     records = []
 
@@ -184,11 +186,11 @@ def main():
     parsed_recs = []
     for rec in records[1:]:
         parsed_recs += [parse_record(rec, fields)]
-    # print parsed_recs
+    print parsed_recs
 
     if args.format == 'text':
         if sys.stdout.isatty():
-            print render_as_text(parsed_recs, fields, tty=True, maxlen=32)
+            print render_as_text(parsed_recs, fields, tty=True, col_width=32)
         else: # you're being piped or redirected
             print render_as_text(parsed_recs, fields)
     elif args.format == 'html':

@@ -85,6 +85,10 @@ def parse_record(rec, fields):
 
 
 def render_as_text(records, fields, tty=None, col_width=None):
+    def render_header(col, do_ansi=False):
+        name = fields[col][0]
+        return ' ' + name.upper() + ' '
+
     def render_item(record, col, do_ansi=False):
         field = fields[col]
         item = record[col]
@@ -106,23 +110,34 @@ def render_as_text(records, fields, tty=None, col_width=None):
                 o = ANSI.BOLD + o + ANSI.END
         return ' ' + o + ' '
 
-    template = ''
-    total_width = 0
-
+    column_widths = []
     for i, field in enumerate(fields):
         rendered_items = [render_item(r, i) for r in records]
-        maxlen = max([len(r) for r in rendered_items])
-        width = maxlen
-        total_width += width
-        template += '{%s: <%s}' % (i, width)
+        max_w = max([len(r) for r in [render_header(i)] + rendered_items])
+        column_widths.append(max_w)
 
-    hr_template ='{:-^%s}' % total_width
-    out = hr_template.format('') + '\n'
+    out = ''
+    for i, field in enumerate(fields):
+        w = column_widths[i]
+        h = render_header(i)
+        out += ('{: <%s}' % w).format(h)
+    out += '\n'
+
+    for i, field in enumerate(fields):
+        w = column_widths[i]
+        out += ('{: <%s}' % w).format(' ---')
+    out += '\n'
+
     for rec in records:
-        rendered_items = [render_item(rec, i) \
-                          for i, item in enumerate(fields)]
-        out += '%s\n' % template.format(*rendered_items)
-    out += hr_template.format('')
+        for i, field in enumerate(fields):
+            w = column_widths[i]
+            item = render_item(rec, i)
+            out += ('{: <%s}' % w).format(item)
+        out += '\n'
+
+    for i, field in enumerate(fields):
+        w = column_widths[i]
+        out += ('{:->%s}' % w).format('|')
     return out
 
 def render_html(header, records):
@@ -151,6 +166,8 @@ def main():
     parser.add_argument('infile', help='input file')
     parser.add_argument('--format', help='output format',
                         choices=['text', 'html'], default='text')
+    parser.add_argument('--col-width', help='output column character width',
+                        type=int, default=36)
     args = parser.parse_args()
 
     def read_record(f):
@@ -181,18 +198,17 @@ def main():
     fields = []
     for i, x in enumerate(records[0]):
         fields += [infer_field(records, i)]
-    # print fields
 
     parsed_recs = []
     for rec in records[1:]:
         parsed_recs += [parse_record(rec, fields)]
-    print parsed_recs
 
     if args.format == 'text':
         if sys.stdout.isatty():
-            print render_as_text(parsed_recs, fields, tty=True, col_width=32)
+            print render_as_text(parsed_recs, fields, col_width=args.col_width,
+                                 tty=True)
         else: # you're being piped or redirected
-            print render_as_text(parsed_recs, fields)
+            print render_as_text(parsed_recs, fields, col_width=args.col_width)
     elif args.format == 'html':
         print 'html'
         # print render_html(catalog)

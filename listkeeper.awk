@@ -1,6 +1,6 @@
 BEGIN {
     RS = ""; FS = "\n";
-    fmt = "%-20.20s|";
+    fmt = "%s\t";
     nf_req = 0;
     nf_opt = 0
 }
@@ -14,8 +14,8 @@ NR == 1 {
 	    name = $i
 	    fields_req[++nf_req] = name;
 	}
-	# printf fmt, toupper(name)
-    }; # printf "\n\n"
+	printf fmt, name
+    }; printf "\n"
 }
 NR > 1 {
     for (i = 1; i <= nf_req; i++) { printf fmt, $i };

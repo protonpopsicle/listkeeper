@@ -33,5 +33,18 @@ while [ "$#" -gt 0 ]; do
     shift
 done
 
-sed 's/^[[:blank:]]*//g' $filename | \
-    awk -f listkeeper.awk # | sort -t't' -k 2 | less -FX
+tsv=$(sed 's/^[[:blank:]]*//g' $filename | awk -f listkeeper.awk)
+output=
+
+if [ "$rawOutput" == true ]; then
+    output=$tsv
+else
+    output=$(echo "$tsv" | sort -t't' -k 2)
+fi
+
+if [ -t 1 ]; then
+    # stdout is a tty
+    echo "$output" | less -FX
+else
+    echo "$output"
+fi

@@ -1,7 +1,7 @@
 title
     author(s)
-    :date
-    :score
+    :date:
+    :score:
 
 The Demolished Man
     Alfred Bester
@@ -22,24 +22,25 @@ Dune
     Frank Herbert
 
 Gateway
-    date:2015-11-25
+    Frederik Pohl
+    date::2015-11-25
 
 You Are Not a Gadget
     Jaron Lanier
-    score:8
+    score::8
 
 Nine Stories
     J.D. Salinger
-    2014/01/16
+    date::2014-01-16
 
 Stars in My Pocket Like Grains of Sand
     Samuel R. Delaney
-    date:2014-07-12
+    date::2014-07-12
 
 Flash Boys
     Michael Lewis
-    date:2014-09-16
+    date::2014-09-16
 
 Diary of a Very Bad Year: Confessions of an Anonymous Hedge Fund Manager
     Anonymous Hedge Fund Manager, Keith Gessen
-    date:2014-10-08
+    date::2014-10-08

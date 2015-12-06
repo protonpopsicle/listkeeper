@@ -1,12 +1,35 @@
 BEGIN {
-    RS = "";
-    FS = "\n";
-    format = "%-36.36s | %-20.20s | %-15.15s | %-10.10s\n"
+    RS = ""; FS = "\n";
+    fmt = "%-20.20s|";
+    nf_req = 0;
+    nf_opt = 0
 }
 NR == 1 {
-    printf format, toupper($1), toupper($2), toupper($3), toupper($4)
-    printf format, "---", "---", "---", "---"
+    for (i = 1; i <= NF; i++) {
+	if (index($i, ":") > 0) {
+	    name = substr($i, 2, length($i) - 2);
+	    fields_opt[++nf_opt] = name;
+	}
+	else {
+	    name = $i
+	    fields_req[++nf_req] = name;
+	}
+	# printf fmt, toupper(name)
+    }; # printf "\n\n"
 }
 NR > 1 {
-    printf format, $1, $2, $3, $4
+    for (i = 1; i <= nf_req; i++) { printf fmt, $i };
+    for (i = 1; i <= nf_opt; i++) {
+	found = 0
+	for (j = 1; j <= NF; j++) {
+	    if (index($j, fields_opt[i])) {
+		found = 1; val = substr($j, length(fields_opt[i]) + 3)
+		printf fmt, val
+	    }
+	}
+	if (found == 0) {
+	    printf fmt, ""
+	}
+    }; printf "\n"
 }
+# END { print "total", NR }

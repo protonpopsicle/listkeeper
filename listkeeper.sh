@@ -4,21 +4,34 @@ set -o errexit
 set -o nounset
 
 display_usage() {
-    echo "usage: $0 [arguments]"
+    echo "usage: $0 file [arguments]"
 }
 
 # if less than one argument supplied, display usage
-if [ $# -le 0 ]
-then
+if [ "$#" -lt 1 ]; then
     display_usage
     exit 1
 fi
 
-# check whether user had supplied -h or --help . If yes display usage
-if [[ ( $# == "--help") || $# == "-h" ]]
-then
-    display_usage
-    exit 0
-fi
+rawOutput=false
+filename=$1
+shift
 
-sed 's/^[[:blank:]]*//g' $1 | awk -f listkeeper.awk # | sort -t't' -k 2 | less -FX
+while [ "$#" -gt 0 ]; do
+    case $1 in
+	-r | --raw)
+	    rawOutput=true
+	    ;;
+	-h | --help)
+	    display_usage
+	    exit
+	    ;;
+       	* )
+	    display_usage
+	    exit
+    esac
+    shift
+done
+
+sed 's/^[[:blank:]]*//g' $filename | \
+    awk -f listkeeper.awk # | sort -t't' -k 2 | less -FX

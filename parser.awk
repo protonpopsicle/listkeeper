@@ -32,4 +32,3 @@ NR > 1 {
 	}
     }; printf "\n"
 }
-# END { print "total", NR }

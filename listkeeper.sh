@@ -13,7 +13,7 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-version="v0.1.0"
+version="0.1.0"
 rawOutput=false
 filename=
 
@@ -46,16 +46,17 @@ while [ "$#" -gt 0 ]; do
 done
 
 tsv=$(sed 's/^[[:blank:]]*//g' $filename | awk -f parser.awk)
-output=
+header=$(echo "$tsv" | head -n 1)
+body=$(echo "$tsv" | tail -n +2)
+sorted=$(echo "$header" && echo "$body" | sort -t't')
+output=$sorted
 
-if [ "$rawOutput" == true ]; then
-    output=$(echo "$tsv" | sort -t't')
-else
-    output=$(echo "$tsv" | sort -t't' | awk -f printer.awk)
+if [ "$rawOutput" == false ]; then
+    output=$(echo "$sorted" | awk -f printer.awk)
 fi
 
 if [ -t 1 ]; then # stdout is a tty
-    echo "$output" | less -FX
+    echo "$output" | less --no-init --quit-if-one-screen --raw-control-chars
 else
     echo "$output"
 fi

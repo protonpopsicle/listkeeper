@@ -13,17 +13,29 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
+version="v0.1.0"
 rawOutput=false
-filename=$1
-shift
+filename=
 
 while [ "$#" -gt 0 ]; do
     case $1 in
+	-f | --file)
+	    shift
+	    if [ ! -f $1 ]; then
+                echo "File not found!"
+		exit 1
+	    fi
+	    filename=$1
+	    ;;
 	-r | --raw)
 	    rawOutput=true
 	    ;;
 	-h | --help)
 	    display_usage
+	    exit
+	    ;;
+	-v | --version)
+	    echo "$version"
 	    exit
 	    ;;
        	* )

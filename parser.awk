@@ -15,14 +15,18 @@ NR == 1 {
     printf "\n"
 }
 NR > 1 {
-    for (i = 1; i <= nf_req; i++) { printf fmt, $i }
-    for (i = 1; i <= nf_opt; i++) {
-    	for (j = 1; j <= NF; j++) {
-    	    if (index($j "::", fields_opt[i])) {
-		printf fmt, "found"
-    		# $(nf_req + i) = $j; $j = ""
-    	    }
-    	}
+    for (i = 1; i <= NF; i++) {
+	if (i > nf_req) {
+	    for (j = 1; j <= nf_opt; j++) { # foreach optional field
+		if (index($i "::", fields_opt[j])) { # field contains "name::"
+		    # $i = "";
+		    # $(i + j - 1) = $i
+		    print i + j - 1
+		    print $i
+		}
+	    }
+	}
+	# printf fmt, $i
     }
     printf "\n"
 }

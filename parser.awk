@@ -14,19 +14,25 @@ NR == 1 {
     }
     printf "\n"
 }
+
+function optional_field_pos(field) {
+    pos = -1
+    for (i = 1; i <= nf_opt; i++) {
+    	if (index(field "::", fields_opt[i])) {
+	    pos = i;
+	}
+    }
+    return pos
+}
+
 NR > 1 {
     for (i = 1; i <= NF; i++) {
 	if (i > nf_req) {
-	    for (j = 1; j <= nf_opt; j++) { # foreach optional field
-		if (index($i "::", fields_opt[j])) { # field contains "name::"
-		    # $i = "";
-		    # $(i + j - 1) = $i
-		    print i + j - 1
-		    print $i
-		}
-	    }
+	    field_pos = optional_field_pos($i)
+	    printf fmt, field_pos
+	} else {
+	    printf fmt, $i
 	}
-	# printf fmt, $i
     }
     printf "\n"
 }

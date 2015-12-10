@@ -1,0 +1,13 @@
+[1mTITLE                     [1mAUTHOR(S)                 [1mDATE                      [1mSCORE                     [1m                          
+(B[mBurning Chrome            (B[mWilliam Gibson            (B[m                          
+(B[mCaves of Steel            (B[mIsaac Asimov              (B[m                          
+(B[mDiary of a Very Bad Year  (B[mAnonymous Hedge Fund Man  (B[m2014-10-08                (B[m                          (B[m                          
+(B[mDune                      (B[mFrank Herbert             (B[m                          
+(B[mFlash Boys                (B[mMichael Lewis             (B[m2014-09-16                (B[m                          (B[m                          
+(B[mGateway                   (B[mFrederik Pohl             (B[m2015-11                   (B[m                          (B[m                          
+(B[mNine Stories              (B[mJ.D. Salinger             (B[m2014-01-16                (B[m                          (B[m                          
+(B[mStars in My Pocket Like   (B[mSamuel R. Delaney         (B[m2014-07-12                (B[m                          (B[m                          
+(B[mThe Demolished Man        (B[mAlfred Bester             (B[m                          (B[m9.2                       (B[m                          
+(B[mThe Difference Engine     (B[mWilliam Gibson, Bruce St  (B[m                          
+(B[mThe Difference Engine: C  (B[mDoron Swade               (B[m                          
+(B[mYou Are Not a Gadget      (B[mJaron Lanier              (B[m                          (B[m8.5                       (B[m                          

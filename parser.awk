@@ -21,7 +21,7 @@ NR > 1 {
 	else {
 	    for (j = 1; j <= nf_opt; j++) { # foreach optional field
 		if (index($i, fields_opt[j]) == 1)
-		    printf fmt, substr($i, length(fields_opt[j]) + 3)
+		    printf fmt, substr($i, length(fields_opt[j]) + 2)
 		else
 		    printf fmt, ""
 	    }

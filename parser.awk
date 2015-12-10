@@ -1,31 +1,42 @@
 BEGIN {
-    RS = ""; FS = "\n"; fmt = "%s\t"
-    nf_req = nf_opt = 0
+    RS = ""
+    FS = "\n"
+    ORS = "\n\n"
+    OFS = "\n"
+    KS = "::" # key separator
 }
 NR == 1 {
     for (i = 1; i <= NF; i++) {
-    	if (index($i, ":") == 1) {
+    	if (index($i, ":") == 1)
 	    $i = substr($i, 2, length($i) - 1)
-	    fields_opt[++nf_opt] = $i
-	} else {
-	    fields_req[++nf_req] = $i
-	}
-	printf fmt, $i
+	fields[i] = $i
     }
-    printf "\n"
+    print
 }
 NR > 1 {
     for (i = 1; i <= NF; i++) {
-	if (i <= nf_req)
-	    printf fmt, $i
-	else {
-	    for (j = 1; j <= nf_opt; j++) { # foreach optional field
-		if (index($i, fields_opt[j]) == 1)
-		    printf fmt, substr($i, length(fields_opt[j]) + 2)
-		else
-		    printf fmt, ""
-	    }
-	}
+	$i = normalize_field(i, $i)
     }
-    printf "\n"
+    print
+}
+
+function in_array(item, array) {
+    for (k in array) {
+	if (array[k] == item)
+	    return 1
+    }
+    return 0
+}
+
+function normalize_field(i, val) {
+    split(val, parts, KS)
+    if (length(parts) > 1) {
+	# some light validation
+	if (in_array(parts[1], fields) == 0) {
+	    printf "Error: undefined field \"%s\"\n", parts[1] > "/dev/stderr"
+	    exit 1
+	}
+    	return parts[1] KS parts[2]
+    }
+    return fields[i] KS val
 }

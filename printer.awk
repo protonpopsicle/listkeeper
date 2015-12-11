@@ -1,9 +1,3 @@
-function build_fmt_str(max_len) {
-    if (max_len >= 38)
-	max_len = 38
-    return "%-" sprintf("%s.%s", max_len, max_len) "s  "
-}
-
 BEGIN {
     FS = "\t";
     nrows = 0
@@ -19,8 +13,19 @@ BEGIN {
 END {
     for (i = 1; i <= nrows; i++) {
     	for (j = 1; j <= length(maxes); j++) {
-    	    printf build_fmt_str(maxes[j]), fields[i,j]
+	    field = fields[i,j]
+    	    printf build_fmt_str(maxes[j], field), field
     	}
     	printf "\n"
     }
+}
+
+function build_fmt_str(max_len, field) {
+    if (max_len >= 38)
+	max_len = 38
+    isnum = match(field, /^[$]?[-]?[0-9|.]+$/)
+    max_part = sprintf("%s.%s", max_len, max_len)
+    # if (isnum)
+    # 	return "%" max_part "s  "
+    return "%-" max_part "s  "
 }

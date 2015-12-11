@@ -1,17 +1,32 @@
 BEGIN {
     FS = "\t";
-    printf "<table>\n"
+    print "<!DOCTYPE html>"
+    print "<html>"
+    print "  <head>"
+    print "    <meta charset=\"utf-8\">"
+    print "  </head>"
+    print "  <body>"
+    print "    <table>"
 }
 NR == 1 {
-    printf "<tr>\n"
-    for (i = 1; i <= NF; i++) { printf "<th>%s</th>\n", $i }
-    printf "</tr>\n"
+    tag = "th";
+    print "      <thead>"
 }
-NR > 1 {
-    printf "<tr>\n"
-    for (i = 1; i <= NF; i++) { printf "<td>%s</td>\n", $i }
-    printf "</tr>\n"
+NR == 2 {
+    print "      </thead>"
+    print "      <tbody>"
+}
+NR > 1 { tag = "td" }
+{
+    print "        <tr>"
+    for (i = 1; i <= NF; i++) {
+	printf "          <%s>%s</%s>\n", tag, $i, tag
+    }
+    print "        </tr>"
 }
 END {
-    printf "</table>\n"
+    print "      </tbody>"
+    print "    </table>"
+    print "  </body>"
+    print "</html>"
 }

@@ -15,6 +15,7 @@ fi
 
 version="0.1.0"
 rawOutput=false
+sortKey="1"
 filename=
 
 while [ "$#" -gt 0 ]; do
@@ -29,6 +30,10 @@ while [ "$#" -gt 0 ]; do
 	    ;;
 	-r | --raw)
 	    rawOutput=true
+	    ;;
+	-k | --key)
+	    shift
+	    sortKey=$1
 	    ;;
 	-h | --help)
 	    display_usage
@@ -45,14 +50,14 @@ while [ "$#" -gt 0 ]; do
     shift
 done
 
-tsv=$(sed 's/^[[:blank:]]*//g' $filename | awk -f parser.awk)
-header=$(echo "$tsv" | head -n 1)
-body=$(echo "$tsv" | tail -n +2)
-sorted=$(echo "$header" && echo "$body" | sort -t't')
+pipeSep=$(sed 's/^[[:blank:]]*//g' $filename | awk -f prep1.awk | awk -f prep2.awk)
+header=$(echo "$pipeSep" | head -n 1)
+body=$(echo "$pipeSep" | tail -n +2)
+sorted=$(echo "$header" && echo "$body" | sort -t'|' -k "$sortKey")
 output=$sorted
 
 if [ "$rawOutput" == false ]; then
-    output=$(echo "$sorted" | awk -f printer.awk)
+    output=$(echo "$sorted" | awk -f form.awk)
 fi
 
 if [ -t 1 ]; then # stdout is a tty

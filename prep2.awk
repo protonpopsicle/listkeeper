@@ -1,7 +1,7 @@
 BEGIN {
     RS = ""
     FS = "\n"
-    OFS = "\t"
+    OFS = "|"
     KS = "::"
 }
 NR == 1 {

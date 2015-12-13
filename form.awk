@@ -1,17 +1,17 @@
+
 BEGIN {
-    FS = "\t";
-    nrows = 0
+    FS = "|"
 }
+NR == 1 { for (i = 1; i<= NF; i++) { $i = toupper($i) } }
 {
     for (i = 1; i <= NF; i++) {
 	if (length($i) > maxes[i])
 	    maxes[i] = length($i)
         fields[NR,i] = $i
     }
-    nrows++
 }
 END {
-    for (i = 1; i <= nrows; i++) {
+    for (i = 1; i <= NR; i++) {
     	for (j = 1; j <= length(maxes); j++) {
 	    field = fields[i,j]
     	    printf build_fmt_str(maxes[j], field), field

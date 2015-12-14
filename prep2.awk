@@ -3,12 +3,15 @@ BEGIN {
     FS = "\n"
     OFS = "|"
     KS = "::"
+    sort_field = ""
 }
 NR == 1 {
     for (i = 1; i <= NF; i++) {
 	fields[i] = $i
     }
     $1=$1; print
+    if (sort_field == "")
+	sort_field = fields[1]
 }
 NR > 1 {
     for (i = 1; i <= NF; i++) {

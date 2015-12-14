@@ -16,6 +16,7 @@ fi
 version="0.1.0"
 rawOutput=false
 sortKey="1"
+search=""
 filename=
 
 while [ "$#" -gt 0 ]; do
@@ -35,6 +36,10 @@ while [ "$#" -gt 0 ]; do
 	    shift
 	    sortKey=$1
 	    ;;
+	-g | --grep)
+	    shift
+	    search=$1
+	    ;;
 	-h | --help)
 	    display_usage
 	    exit
@@ -50,14 +55,14 @@ while [ "$#" -gt 0 ]; do
     shift
 done
 
-pipeSep=$(sed 's/^[[:blank:]]*//g' $filename | awk -f prep1.awk | awk -f prep2.awk)
+pipeSep=$(sed 's/^[[:blank:]]*//g' $filename | awk -v search="$search" -f prep1.awk | awk -f prep2.awk)
 header=$(echo "$pipeSep" | head -n 1)
 body=$(echo "$pipeSep" | tail -n +2)
-sorted=$(echo "$header" && echo "$body" | sort -t'|' -k "$sortKey")
-output=$sorted
+# sorted=$(echo "$header" && echo "$body" | sort -t'|' -k "$sortKey")
+output=$pipeSep
 
 if [ "$rawOutput" == false ]; then
-    output=$(echo "$sorted" | awk -f form.awk)
+    output=$(echo "$output" | awk -f form.awk)
 fi
 
 if [ -t 1 ]; then # stdout is a tty

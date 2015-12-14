@@ -4,6 +4,7 @@ BEGIN {
     ORS = "\n\n"
     OFS = "\n"
     KS = "::" # key separator
+    search = tolower(search)
 }
 NR == 1 {
     for (i = 1; i <= NF; i++) {
@@ -13,12 +14,12 @@ NR == 1 {
     }
     print
 }
-NR > 1 {
+NR > 1  {
     for (i = 1; i <= NF; i++) {
 	$i = normalize_field(i, $i)
     }
-    print
 }
+NR > 1 && tolower($0) ~ search { print } # only print records that match search
 
 function in_array(item, array) {
     for (k in array) {

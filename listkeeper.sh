@@ -14,8 +14,9 @@ if [ "$#" -lt 1 ]; then
 fi
 
 version="0.1.0"
-rawOutput=false
+rawOutput=0
 sortField=
+reverseSort=0
 search=
 filename=
 
@@ -29,10 +30,13 @@ while [ "$#" -gt 0 ]; do
 	    fi
 	    filename=$1
 	    ;;
-	-r | --raw)
-	    rawOutput=true
+	--raw)
+	    rawOutput=1
 	    ;;
-	-k | --key)
+	-r | --reverse)
+	    reverseSort=1
+	    ;;
+	-s | --sort)
 	    shift
 	    sortField=$1
 	    ;;
@@ -55,12 +59,12 @@ while [ "$#" -gt 0 ]; do
     shift
 done
 
-pipeSep=$(sed 's/^[[:blank:]]*//g' $filename | awk -v search="$search" -f prep1.awk | awk -v sortField=$sortField -f prep2.awk)
-# header=$(echo "$pipeSep" | head -n 1)
-# body=$(echo "$pipeSep" | tail -n +2)
+pipeSep=$(sed 's/^[[:blank:]]*//g' $filename | \
+		 awk -v search="$search" -f prep1.awk | \
+		 awk -v sortField="$sortField" -v reverse=$reverseSort -f prep2.awk)
 output=$pipeSep
 
-if [ "$rawOutput" == false ]; then
+if [ "$rawOutput" == 0 ]; then
     output=$(echo "$output" | awk -f form.awk)
 fi
 

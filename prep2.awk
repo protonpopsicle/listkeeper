@@ -27,6 +27,8 @@ NR > 1 {
     	    $i = ""
     }
     command = "sort -t'" OFS "' -k " sortCol "," sortCol
+    if (reverse == 1)
+	command = command " -r"
     print | command
     for (i in val)
 	delete val[i]

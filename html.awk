@@ -1,5 +1,5 @@
 BEGIN {
-    FS = "\t";
+    FS = "|";
     print "<!DOCTYPE html>"
     print "<html>"
     print "  <head>"

@@ -3,15 +3,17 @@ BEGIN {
     FS = "\n"
     OFS = "|"
     KS = "::"
-    sort_field = ""
+    sortCol = 1
 }
 NR == 1 {
     for (i = 1; i <= NF; i++) {
 	fields[i] = $i
+	if (tolower(sortField) == tolower($i))
+	    sortCol = i
     }
     $1=$1; print
-    if (sort_field == "")
-	sort_field = fields[1]
+    if (sortField == "")
+	sortField = fields[1]
 }
 NR > 1 {
     for (i = 1; i <= NF; i++) {
@@ -24,7 +26,8 @@ NR > 1 {
     	else
     	    $i = ""
     }
-    print
+    command = "sort -t'" OFS "' -k " sortCol "," sortCol
+    print | command
     for (i in val)
 	delete val[i]
 }

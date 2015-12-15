@@ -15,8 +15,8 @@ fi
 
 version="0.1.0"
 rawOutput=false
-sortKey="1"
-search=""
+sortField=
+search=
 filename=
 
 while [ "$#" -gt 0 ]; do
@@ -34,7 +34,7 @@ while [ "$#" -gt 0 ]; do
 	    ;;
 	-k | --key)
 	    shift
-	    sortKey=$1
+	    sortField=$1
 	    ;;
 	-g | --grep)
 	    shift
@@ -55,10 +55,9 @@ while [ "$#" -gt 0 ]; do
     shift
 done
 
-pipeSep=$(sed 's/^[[:blank:]]*//g' $filename | awk -v search="$search" -f prep1.awk | awk -f prep2.awk)
-header=$(echo "$pipeSep" | head -n 1)
-body=$(echo "$pipeSep" | tail -n +2)
-# sorted=$(echo "$header" && echo "$body" | sort -t'|' -k "$sortKey")
+pipeSep=$(sed 's/^[[:blank:]]*//g' $filename | awk -v search="$search" -f prep1.awk | awk -v sortField=$sortField -f prep2.awk)
+# header=$(echo "$pipeSep" | head -n 1)
+# body=$(echo "$pipeSep" | tail -n +2)
 output=$pipeSep
 
 if [ "$rawOutput" == false ]; then

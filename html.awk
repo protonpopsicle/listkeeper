@@ -4,6 +4,7 @@ BEGIN {
     print "<html>"
     print "  <head>"
     print "    <meta charset=\"utf-8\">"
+    print "    <link rel=\"stylesheet\" href=\"styles.css\">"
     print "  </head>"
     print "  <body>"
     print "    <table>"

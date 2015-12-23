@@ -1,0 +1,21 @@
+table {
+    border-collapse: collapse;
+    border: 1px solid black;
+    background: #FFFDCB;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+tr:nth-child(even) {
+    background-color: #FDDFFF;
+}
+
+th {
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    text-transform: uppercase;
+    font-weight: normal;
+    color: blue;
+}

@@ -1,21 +1,26 @@
+body {
+    -webkit-font-smoothing: antialiased;
+    font-family: Tahoma, sans-serif;
+    font-size: 13px;
+}
+
 table {
     border-collapse: collapse;
-    border: 1px solid black;
-    background: #FFFDCB;
+}
+
+thead {
+    border-bottom: 1px solid black;
+    border-top: 1px solid black;
+}
+
+tbody {
+    border-bottom: 1px solid black;
 }
 
 th, td {
     padding: 8px;
-    text-align: left;
-}
-
-tr:nth-child(even) {
-    background-color: #FDDFFF;
 }
 
 th {
-    font-family: "Comic Sans MS", cursive, sans-serif;
-    text-transform: uppercase;
-    font-weight: normal;
-    color: blue;
+    text-transform: capitalize;
 }

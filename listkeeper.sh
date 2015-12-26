@@ -14,7 +14,7 @@ if [ "$#" -lt 1 ]; then
 fi
 
 version="0.1.0"
-rawOutput=0
+outFormat=
 sortField=
 reverseSort=0
 search=
@@ -30,8 +30,9 @@ while [ "$#" -gt 0 ]; do
 	    fi
 	    filename=$1
 	    ;;
-	--raw)
-	    rawOutput=1
+	-o | --output)
+	    shift
+	    outFormat=$1
 	    ;;
 	-r | --reverse)
 	    reverseSort=1
@@ -64,9 +65,17 @@ pipeSep=$(sed 's/^[[:blank:]]*//g' $filename | \
 		 awk -v sortField="$sortField" -v reverse=$reverseSort -f prep2.awk)
 output=$pipeSep
 
-if [ "$rawOutput" == 0 ]; then
-    output=$(echo "$output" | awk -f form.awk)
-fi
+case "$outFormat" in
+    "html")
+	output=$(echo "$output" | awk -f html.awk)
+	;;
+    "raw")
+	# do nothing
+	;;
+    *)
+	output=$(echo "$output" | awk -f form.awk)
+	;;
+esac
 
 if [ -t 1 ]; then # stdout is a tty
     echo "$output" | less --no-init --quit-if-one-screen --raw-control-chars

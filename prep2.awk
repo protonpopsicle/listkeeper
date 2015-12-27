@@ -3,7 +3,7 @@ BEGIN {
     FS = "\n"
     OFS = "|"
     KS = "::"
-    sortCol = 1
+    sortCol = 0
 }
 NR == 1 {
     for (i = 1; i <= NF; i++) {
@@ -26,10 +26,14 @@ NR > 1 {
     	else
     	    $i = ""
     }
-    command = "sort -t'" OFS "' -k " sortCol "," sortCol
-    if (reverse == 1)
-	command = command " -r"
-    print | command
+    if (sortCol == 0)
+	print
+    else {
+	command = "sort -t'" OFS "' -k " sortCol "," sortCol
+	if (reverse == 1)
+	    command = command " -r"
+	print | command
+    }
     for (i in val)
 	delete val[i]
 }

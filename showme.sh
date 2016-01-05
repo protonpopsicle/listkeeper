@@ -12,17 +12,8 @@ rulem ()  {
 }
 
 tput clear
-# tput setb 4
-tput setaf 3
-tput bold
-rulem '[ TODO ]'
+tput setaf 7; rulem '=[ BEGIN ]='
+tput setaf 4; printf "$(sh listkeeper.sh -f ~/Dropbox/todo.list -s priority)\n\n"
+tput setaf 3; printf "$(sh listkeeper.sh -f ~/Dropbox/projects.list -s importance -r)\n\n"
+tput setaf 7; rulem '=[ END ]='
 tput sgr0
-tput setaf 4
-printf "$(sh listkeeper.sh -f ~/Dropbox/todo.list -s priority)\n"
-tput setaf 5
-tput bold
-rulem '[ PROJECTS ]'
-tput setaf 6
-tput sgr0
-printf "$(sh listkeeper.sh -f ~/Dropbox/projects.list -s importance -r)\n"
-printf "\n"

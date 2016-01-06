@@ -3,7 +3,7 @@
 set -o errexit
 set -o nounset
 
-# WIDTH=$(tput cols)
+currentYear=$(date +'%Y')
 
 ## Print horizontal ruler with message
 rulem ()  {
@@ -15,5 +15,6 @@ tput clear
 tput setaf 7; rulem '=[ BEGIN ]='
 tput setaf 4; printf "$(sh listkeeper.sh -f ~/Dropbox/todo.list -s priority)\n\n"
 tput setaf 3; printf "$(sh listkeeper.sh -f ~/Dropbox/projects.list -s importance -r)\n\n"
+tput setaf 5; printf "$(sh listkeeper.sh -f ~/Dropbox/resolutions$currentYear.list)\n\n"
 tput setaf 7; rulem '=[ END ]='
 tput sgr0

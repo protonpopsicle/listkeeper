@@ -6,15 +6,15 @@ BEGIN {
     KS = "::" # key separator
     search = tolower(search)
 }
-NR == 1 {
-    for (i = 1; i <= NF; i++) {
+NR == 1 { # first record defines fields
+    for (i = 1; i <= NF; i++) { # foreach field
     	if (index($i, ":") == 1)
 	    $i = substr($i, 2, length($i) - 1)
 	fields[i] = $i
     }
     print
 }
-NR > 1  {
+NR > 1  { # normalize the fields in each record
     for (i = 1; i <= NF; i++) {
 	$i = normalize_field(i, $i)
     }

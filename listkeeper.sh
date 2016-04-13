@@ -82,3 +82,6 @@ if [ -t 1 ]; then # stdout is a tty
 else
     echo "$output"
 fi
+
+# consider the following
+# ./listkeeper.sh -f ~/Dropbox/books.list -o raw | awk 'BEGIN {FS = "|"; OFS = "|"}{$1 = ""; $3 = ""; print}'

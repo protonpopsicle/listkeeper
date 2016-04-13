@@ -62,7 +62,7 @@ done
 
 pipeSep=$(sed 's/^[[:blank:]]*//g' $filename | \
 		 awk -v search="$search" -f prep1.awk | \
-		 awk -v sortField="$sortField" -v reverse=$reverseSort -f prep2.awk | awk -f prep3.awk)
+		 awk -v sortField="$sortField" -v reverse=$reverseSort -f prep2.awk)
 output=$pipeSep
 
 case "$outFormat" in

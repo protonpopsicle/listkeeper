@@ -2,10 +2,10 @@ ln = 1
 cn = 0
 
 class Token:
-    String = 'string'
-    Colon = 'colon'
+    String = 'str'
+    Colon  = ':'
     Indent = 'indent'
-    Newline = 'newline'
+    EOF    = 'EOF'
 
 def peek(f, length=1):
     pos = f.tell()
@@ -20,7 +20,9 @@ def scan(f):
     while True:
         c = f.read(1)
         if not c:
-            return None
+            if len(char_buffer):
+                return Token.String, char_buffer
+            return Token.EOF, None
         cn += 1
 
         if c == '\n':

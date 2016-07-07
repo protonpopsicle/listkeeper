@@ -2,55 +2,56 @@ from lexer import Token, scan
 
 
 """
-alist -> head items
-head -> key keys
-keys -> indent key | indent :key | e
-key -> string
+alist  -> head items
+head   -> key keys
+keys   -> indent key | indent :key | e
+key    -> string
 
-items -> item items | e
-item -> value values
+items  -> item items | e
+item   -> value values
 values -> indent value | indent key::value | e
-value -> string
+value  -> string
 """
 class Parser(object):
     def __init__(self, f, *args, **kwargs):
-        self.f = f  # fp
+        self.f    = f # fp
         self.look = None
-        self.parsed_keys     = []  # keys
-        self.parsed_posikeys = []  # positional keys
-        self.data            = []  # list of tuples
+        self.parsed_keys     = []
+        self.parsed_posikeys = []
+        self.data = [[]] # contains lists of tuples
         super(Parser, self).__init__(*args, **kwargs)
 
     def move(self):
         self.look = scan(self.f)
 
+    def match(self, tok):
+        self.move()
+        if self.look[0] != tok:
+            raise Exception('Expected %s, got %s' % (tok, self.look[0]))
+
     # alist -> head items
     def alist(self):
-        posikeys, keys = self.head()
+        self.head()
         self.items()
         print self.data
 
     # head -> key keys
     def head(self):
         self.move()
-        first_key = self.key()
-        posikeys, keys = self.keys()
-        return [first_key] + posikeys, keys
+        self.parsed_keys.append(self.key()) # first key
+        self.keys()
 
     # keys -> indent key | indent :key | e
     def keys(self):
         self.move()
-        posikeys = []
-        keys     = []
         while self.look[0] == Token.Indent:
             self.move()
             if self.look[0] == Token.Colon:
                 self.move()
-                keys.append(self.key())
+                self.parsed_keys.append(self.key())
             else:
-                posikeys.append(self.key())
+                self.parsed_posikeys.append(self.key())
             self.move()
-        return posikeys, keys
 
     # key -> string
     def key(self):
@@ -58,49 +59,49 @@ class Parser(object):
             return self.look[1]
         raise Exception('Expected string')
 
+
     # items -> item items | e
     def items(self):
-        self.item()
-        # self.items()
+        while True:
+            item = self.item()
+            if not item:
+                break
     
     # item -> value values
     def item(self):
-        first_val = self.value()
-        print 'first_val %s' % first_val
-        values = self.values()
+        self.data.append([(self.parsed_keys[0], self.value())])
+        self.values()
     
     # values -> indent value | indent key::value | e
     def values(self):
         self.move()
-        rn = 0
+        pos = 0
 
         while self.look[0] == Token.Indent:
             self.move()
-            part1 = self.value()
-            if self.look[0] == Token.Colon:
-                self.move()
-                if self.look[0] == Token.Colon:
-                    if part1 not in self.parsed_keys:
-                        raise Exception('No such key "%s".' % part1)                    
-                    value = self.value()
-                    self.data.append((part1, value))
-                else:
-                    raise Exception("Single ':' should be '::'")
-            else:
-                if len(self.parsed_posikeys) > rn:
-                    self.data.append((self.parsed_posikeys[rn], part1))
-                else:
-                    raise Exception('Extr a positional value in item.')
-
+            lhs = self.value()
             self.move()
-            rn += 1
+
+            if self.look[0] == Token.Colon:
+                self.match(Token.Colon)
+                self.move()
+                if lhs not in self.parsed_keys:
+                    raise Exception('No such key "%s".' % lhs)
+                rhs = self.value()
+                self.data[-1].append((lhs, rhs))
+            else:
+                if len(self.parsed_posikeys) > pos:
+                    self.data[-1].append((self.parsed_posikeys[pos], lhs))
+                else:
+                    raise Exception('Extra positional value in item.')
+
+            pos += 1
     
     # value -> string
     def value(self):
         if self.look[0] == Token.String:
             return self.look[1]
-        raise Exception('Expected string')
-
+        raise Exception('Expected string, got %s' % self.look[0])
 
 with open('test.list', 'U') as f:
     p = Parser(f)

@@ -1,9 +1,5 @@
 class List(object):
-    def __init__(self, positional_keys, keys):
-        self.positional_keys = positional_keys
-        self.keys = keys
-        self.data = [] # list of dicts
-
-    def insert(item_dict):
-        pass
-
+    def __init__(self, p_keys, opt_keys):
+        self.p_keys   = p_keys
+        self.opt_keys = opt_keys
+        self.items    = []

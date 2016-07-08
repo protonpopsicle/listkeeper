@@ -2,44 +2,46 @@ from lexer import Token, scan
 
 
 """
-alist  -> head items
-head   -> key keys
-keys   -> indent key | indent :key | e
-key    -> string
+list     -> head items
+head     -> key p_keys opt_keys
+p_keys   -> p_key p_keys | e
+opt_keys -> opt_key opt_keys | e
+p_key    -> indent key
+opt_key  -> indent :key
+key      -> string
 
-items  -> item items | e
-item   -> value values
-values -> indent value | indent key::value | e
-value  -> string
+items    -> item items | e
+item     -> val p_vals opt_vals
+p_vals   -> p_val p_vals | e
+opt_vals -> opt_val opt_vals | e
+p_val    -> indent val
+opt_val  -> indent key::val
+val      -> string
 """
 class Parser(object):
     def __init__(self, f, *args, **kwargs):
         self.f    = f # fp
         self.look = None
-        self.parsed_keys     = []
-        self.parsed_posikeys = []
-        self.data = [[]] # contains lists of tuples
         super(Parser, self).__init__(*args, **kwargs)
 
     def move(self):
         self.look = scan(self.f)
 
-    def match(self, tok):
+    def match(self, token):
         self.move()
-        if self.look[0] != tok:
-            raise Exception('Expected %s, got %s' % (tok, self.look[0]))
+        if self.look[0] != token:
+            raise Exception('Expected %s, got %s' % (token, self.look[0]))
 
     # alist -> head items
     def alist(self):
         self.head()
         self.items()
-        print self.data
 
-    # head -> key keys
+    # head -> p_keys opt_keys
     def head(self):
         self.move()
-        self.parsed_keys.append(self.key()) # first key
-        self.keys()
+        positional_key = self.key()
+        positinal_keys, keys = self.keys()
 
     # keys -> indent key | indent :key | e
     def keys(self):

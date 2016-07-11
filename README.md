@@ -1,5 +1,5 @@
 # lyst
 
 - [ ] Option to exclude columns in output
-- [ ] Single-line entries
-- [ ] proper parser in Python
+- [x] Single-line entries
+- [x] proper parser in Python

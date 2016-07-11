@@ -1,10 +1,11 @@
-ln = 1
-cn = 0
+state = dict(
+    ln=1,
+    line_buffer="")
 
 class Token:
-    String = 'str'
+    String = 'String'
     Colon  = ':'
-    Indent = 'indent'
+    Indent = 'Indent'
     EOF    = 'EOF'
 
 def peek(f, length=1):
@@ -14,33 +15,31 @@ def peek(f, length=1):
     return data
 
 def scan(f):
-    global ln
-    global cn
     char_buffer = ""
     while True:
         c = f.read(1)
         if not c:
             if len(char_buffer):
-                return Token.String, char_buffer
+                return Token.String, char_buffer.rstrip()
             return Token.EOF, None
-        cn += 1
+        state['line_buffer'] += c
+
+        # print state['line_buffer']
 
         if c == '\n':
-            ln += 1
-            cn = 0
+            state['ln'] += 1
+            state['line_buffer'] = ""
             char_buffer = ""
-            if peek(f).isspace():
-                return Token.Indent, None
-        if c == ':':
-            char_buffer = ""
-            return Token.Colon, None
-        else:
-            if char_buffer or not c.isspace():
-                char_buffer += c
+            continue
+        elif len(char_buffer) or not c.isspace():
+            if c == ':' and (not len(char_buffer) or peek(f) == ':'):
+                return Token.Colon, None
+            char_buffer += c
 
-        if peek(f) == '\n':
-            if len(char_buffer):
-                return Token.String, char_buffer
-        elif peek(f) == ':':
-            if len(char_buffer):
-                return Token.String, char_buffer
+            peek2 = peek(f, 2)
+            if peek2 == '::' or peek2[0] == '\n':
+                return Token.String, char_buffer.rstrip()
+        elif not peek(f).isspace():
+            return Token.Indent, None
+
+

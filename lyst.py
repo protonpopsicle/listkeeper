@@ -4,7 +4,13 @@ class Lyst(object):
         self.opt_keys = opt_keys
         self.items    = []
 
-    def add_item(p_vals, opt_vals):
+    def dump(self):
+        for item in self.items:
+            for x in item:
+                print '%s: %s' % x
+            print ''
+
+    def add_item(self, p_vals, opt_vals):
         delta = len(p_vals) - len(self.p_keys)
         if delta:
             raise Exception('Number of positional values off by %u' % delta)

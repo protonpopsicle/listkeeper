@@ -1,11 +1,9 @@
-from lexer import Token, scan, state
-from lyst import Lyst
+from lexer import Token, Lexer
+from lyst import Lyst, ValidationError
 
 
 class ParseError(Exception):
-    def __init__(self, message):
-        msg = "line %s '%s'\n%s: %s" % (state['ln'], state['line_buffer'], self.__class__.__name__, message)
-        super(ParseError, self).__init__(msg)
+    pass
 
 """
 lyst     -> head items
@@ -20,20 +18,17 @@ key      -> string
 val      -> string
 """
 class Parser(object):
-    def __init__(self, f):
-        self.f = f # fp
-        self.peek = scan(f)
-        print self.peek
-        self.peek2 = scan(f)
-        print self.peek2
-        self.look = None
+    def __init__(self, lexer):
+        self.lexer = lexer
+        self.peek  = lexer.scan()
+        self.peek2 = lexer.scan()
+        self.look  = None
         self._lyst = None
 
     def move(self):
         self.look = self.peek
         self.peek = self.peek2
-        self.peek2 = scan(self.f)
-        print self.peek2
+        self.peek2 = self.lexer.scan()
 
     def match(self, token):
         self.move()
@@ -92,7 +87,7 @@ class Parser(object):
     def p_vals(self):
         vals = []
         while self.look[0] == Token.Indent and self.peek[0] == Token.String and \
-              self.peek2[0] != Token.Colon:
+              self.peek2[0] != Token.SuperColon:
             self.move()
             vals.append(self.val())
             self.move()
@@ -102,11 +97,10 @@ class Parser(object):
     def opt_vals(self):
         vals = []
         while self.look[0] == Token.Indent and self.peek[0] == Token.String and \
-              self.peek2[0] == Token.Colon:
+              self.peek2[0] == Token.SuperColon:
             self.move()
             key = self.key()
-            self.match(Token.Colon)
-            self.match(Token.Colon)
+            self.match(Token.SuperColon)
             self.move()
             vals.append((key, self.val()))
             self.move()
@@ -125,8 +119,11 @@ class Parser(object):
         raise ParseError('expected %s, got %s' % (Token.String, self.look[0]))
 
 with open('test.list', 'U') as f:
-    p = Parser(f)
+    lexer = Lexer(f)
+    p = Parser(lexer)
     try:
         p.lyst()
     except ParseError as e:
-        print e.message
+        print 'ParserError: line %u: %s' % (lexer.ln, e.message)
+    except ValidationError as e:
+        print 'ValidationError: %s' % e.message

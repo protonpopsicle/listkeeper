@@ -1,45 +1,56 @@
-state = dict(
-    ln=1,
-    line_buffer="")
-
 class Token:
     String = 'String'
     Colon  = ':'
+    SuperColon  = '::'
     Indent = 'Indent'
-    EOF    = 'EOF'
+    EOF = 'EOF'
 
-def peek(f, length=1):
-    pos = f.tell()
-    data = f.read(length)
-    f.seek(pos)
-    return data
+def get(list, i):
+    try:
+        return list[i]
+    except IndexError:
+        return None
 
-def scan(f):
-    char_buffer = ""
-    while True:
-        c = f.read(1)
-        if not c:
-            if len(char_buffer):
-                return Token.String, char_buffer.rstrip()
+class Lexer(object):
+    def __init__(self, f):
+        self.f = f
+        self.tokens = []
+        self.line = ''
+        self.ln = 0
+
+    def scan(self):
+        # returns one token at a time
+        if len(self.tokens):
+           return self.tokens.pop(0)
+        try:
+            self.line = next(self.f).rstrip()
+            self.ln += 1
+            self.tokens += self.scan_line(self.line)
+            return self.scan()
+        except StopIteration:
             return Token.EOF, None
-        state['line_buffer'] += c
 
-        # print state['line_buffer']
+    def scan_line(self, line):
+        # fills token buffer
+        tokens = []
+        if len(line):
+            if line[0].isspace():
+                tokens.append((Token.Indent, None))
+                line = line.lstrip()
 
-        if c == '\n':
-            state['ln'] += 1
-            state['line_buffer'] = ""
             char_buffer = ""
-            continue
-        elif len(char_buffer) or not c.isspace():
-            if c == ':' and (not len(char_buffer) or peek(f) == ':'):
-                return Token.Colon, None
-            char_buffer += c
+            for i, c in enumerate(line):
+                if c == ':':
+                    if get(line, i+1) == ':':
+                        if len(char_buffer):
+                            tokens.append((Token.String, char_buffer))
+                            char_buffer = ""
+                        tokens.append((Token.SuperColon, None))
+                    elif i == 0:
+                        tokens.append((Token.Colon, None))
+                else:
+                    char_buffer += c
 
-            peek2 = peek(f, 2)
-            if peek2 == '::' or peek2[0] == '\n':
-                return Token.String, char_buffer.rstrip()
-        elif not peek(f).isspace():
-            return Token.Indent, None
-
-
+            if len(char_buffer):
+                tokens.append((Token.String, char_buffer))
+        return tokens

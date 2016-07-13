@@ -118,7 +118,7 @@ class Parser(object):
             return self.look[1]
         raise ParseError('expected %s, got %s' % (Token.String, self.look[0]))
 
-with open('test.list', 'U') as f:
+with open('/Users/smeisburger/Dropbox/books.list', 'U') as f:
     lexer = Lexer(f)
     p = Parser(lexer)
     try:

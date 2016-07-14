@@ -1,7 +1,3 @@
-import csv
-import sys
-
-
 class ValidationError(Exception):
     pass
 
@@ -11,17 +7,11 @@ class Lyst(object):
         self.opt_keys = opt_keys
         self.items    = []
 
-    def sorted(self, primary, secondary=None):
+    def sort(self, primary, secondary=None):
         key = lambda d: d[primary].lower()
         if secondary:
             key = lambda d: (d[primary].lower(), d[secondary].lower())
         return sorted(self.items, key=key)
-
-    def dump(self):
-        writer = csv.DictWriter(sys.stdout, fieldnames=self.p_keys + self.opt_keys)
-        writer.writeheader()
-        for item in self.sorted('author', 'title'):
-            writer.writerow(item)
 
     def add_item(self, p_vals, opt_vals):
         delta = len(p_vals) - len(self.p_keys)

@@ -73,7 +73,6 @@ class Parser(object):
     def items(self):
         while self.look[0] != Token.EOF:
             self.item()
-        self._lyst.dump()
 
     # item -> val p_vals opt_vals
     def item(self):
@@ -117,13 +116,3 @@ class Parser(object):
         if self.look[0] == Token.String:
             return self.look[1]
         raise ParseError('expected %s, got %s' % (Token.String, self.look[0]))
-
-with open('/Users/smeisburger/Dropbox/books.list', 'U') as f:
-    lexer = Lexer(f)
-    p = Parser(lexer)
-    try:
-        p.lyst()
-    except ParseError as e:
-        print 'ParserError: line %u: %s' % (lexer.ln, e.message)
-    except ValidationError as e:
-        print 'ValidationError: %s' % e.message

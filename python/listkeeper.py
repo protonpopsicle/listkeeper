@@ -6,7 +6,7 @@ from lexer import Lexer
 from lyst import ValidationError
 
 
-def run(fname, sort_args, reverse):
+def do_it(fname, sort_args, reverse):
     with open(fname, 'U') as f:
         lexer = Lexer(f)
         p = Parser(lexer)
@@ -37,4 +37,5 @@ if __name__ == "__main__":
 
     #validate
     sort_args = args.sort.split(',')
-    run(args.fname, sort_args, args.reverse)
+    do_it(args.fname, sort_args, args.reverse)
+

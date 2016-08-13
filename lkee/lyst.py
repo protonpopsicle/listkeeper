@@ -1,3 +1,6 @@
+import operator
+
+
 class ValidationError(Exception):
     pass
 
@@ -5,13 +8,7 @@ class Lyst(object):
     def __init__(self, p_keys, opt_keys):
         self.p_keys   = p_keys
         self.opt_keys = opt_keys
-        self.items    = []
-
-    def sort(self, primary, secondary=None):
-        key = lambda d: d[primary].lower()
-        if secondary:
-            key = lambda d: (d[primary].lower(), d[secondary].lower())
-        return sorted(self.items, key=key)
+        self.items    = [] # list of dicts
 
     def add_item(self, p_vals, opt_vals):
         delta = len(p_vals) - len(self.p_keys)
@@ -28,3 +25,11 @@ class Lyst(object):
             item[key] = val
 
         self.items.append(item)
+
+
+def grep(items, query):
+    query.split('::')
+        
+def sort(lyst, reverse=False, *args):
+    key = operator.itemgetter(*args)
+    return sorted(lyst.items, key=key, reverse=reverse)

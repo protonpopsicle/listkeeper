@@ -1,5 +1,6 @@
-# lyst
+# ListKeeper
 
-- [ ] Option to exclude columns in output
+- [x] Option to exclude columns in output
 - [x] Single-line entries
 - [x] proper parser in Python
+- [ ] packaging
